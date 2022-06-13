@@ -1,5 +1,4 @@
 using BepInEx;
-using BepInEx.Configuration;
 using R2API;
 using R2API.Utils;
 using RoR2;
@@ -12,17 +11,9 @@ using System.Linq;
 
 namespace ShrineOfDisorder
 {
-    // This attribute specifies that we have a dependency on R2API, as we're using it to add our item to the game.
     [BepInDependency(R2API.R2API.PluginGUID)]
-
-    // This attribute is required, and lists metadata for your plugin.
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
-
-    // The mod is compatible with multiplayer, and only the host needs the mod.
-    [NetworkCompatibility(CompatibilityLevel.NoNeedForSync, VersionStrictness.DifferentModVersionsAreOk)]
-
-    // This is the main declaration of our plugin class. BepInEx searches for all classes inheriting from BaseUnityPlugin to initialize on startup.
-    // BaseUnityPlugin itself inherits from MonoBehaviour, so you can use this as a reference for what you can declare and use in your plugin class: https://docs.unity3d.com/ScriptReference/MonoBehaviour.html
+    [NetworkCompatibility(CompatibilityLevel.NoNeedForSync, VersionStrictness.DifferentModVersionsAreOk)] //The mod is compatible with multiplayer, and only the host needs the mod.
     public class ShrineOfDisorder : BaseUnityPlugin
     {
         public const string PluginGUID = PluginAuthor + "." + PluginName;
@@ -38,8 +29,6 @@ namespace ShrineOfDisorder
 
         // Dictionary of all drop lists by tier. Will be populated when the run starts.
         private static Dictionary<ItemTier, List<PickupIndex>> dropLists;
-
-        //private static Xoroshiro128Plus debugRng;
 
         public void Awake()
         {
@@ -116,19 +105,17 @@ namespace ShrineOfDisorder
         {
             orig(self);
 
-            //debugRng = self.treasureRng;
-
             dropLists = new Dictionary<ItemTier, List<PickupIndex>>
             {
-                {ItemTier.Tier1, Run.instance.availableTier1DropList},
-                {ItemTier.Tier2, Run.instance.availableTier2DropList},
-                {ItemTier.Tier3, Run.instance.availableTier3DropList},
-                {ItemTier.Lunar, Run.instance.availableLunarItemDropList},
-                {ItemTier.Boss, Run.instance.availableBossDropList},
+                {ItemTier.Tier1,     Run.instance.availableTier1DropList},
+                {ItemTier.Tier2,     Run.instance.availableTier2DropList},
+                {ItemTier.Tier3,     Run.instance.availableTier3DropList},
+                {ItemTier.Lunar,     Run.instance.availableLunarItemDropList},
+                {ItemTier.Boss,      Run.instance.availableBossDropList},
                 {ItemTier.VoidTier1, Run.instance.availableVoidTier1DropList},
                 {ItemTier.VoidTier2, Run.instance.availableVoidTier2DropList},
                 {ItemTier.VoidTier3, Run.instance.availableVoidTier3DropList},
-                {ItemTier.VoidBoss, Run.instance.availableVoidBossDropList}
+                {ItemTier.VoidBoss,  Run.instance.availableVoidBossDropList}
             };
 
             foreach (var item in dropLists)
@@ -140,46 +127,6 @@ namespace ShrineOfDisorder
         //The Update() method is run on every frame of the game.
         private void Update()
         {
-            /*
-            if (Input.GetKeyDown(KeyCode.F2))
-            {
-                //var transform = PlayerCharacterMasterController.instances[0].master.GetBodyObject().transform;
-                RestackBehavior(PlayerCharacterMasterController.instances[0].master.inventory, debugRng);
-            }
-            if (Input.GetKeyDown(KeyCode.F3))
-            {
-                var selection = new WeightedSelection<ItemTier>();
-                selection.AddChoice(ItemTier.Tier1, 0.7f);
-                selection.AddChoice(ItemTier.Tier2, 0.2f);
-                selection.AddChoice(ItemTier.Tier3, 0.1f);
-
-                var tier = selection.Evaluate(debugRng.nextNormalizedFloat);
-                GiveRandomItems(PlayerCharacterMasterController.instances[0].master.inventory, dropLists[tier], 5, debugRng);
-            }
-            if (Input.GetKeyDown(KeyCode.F4))
-            {
-                GiveRandomItems(PlayerCharacterMasterController.instances[0].master.inventory, dropLists[ItemTier.Lunar], 5, debugRng);
-            }
-            if (Input.GetKeyDown(KeyCode.F5))
-            {
-                var selection = new WeightedSelection<ItemTier>();
-                selection.AddChoice(ItemTier.VoidTier1, 0.7f);
-                selection.AddChoice(ItemTier.VoidTier2, 0.2f);
-                selection.AddChoice(ItemTier.VoidTier3, 0.1f);
-
-                var tier = selection.Evaluate(debugRng.nextNormalizedFloat);
-                GiveRandomItems(PlayerCharacterMasterController.instances[0].master.inventory, dropLists[tier], 5, debugRng);
-            }
-            if (Input.GetKeyDown(KeyCode.F6))
-            {
-                var selection = new WeightedSelection<ItemTier>();
-                selection.AddChoice(ItemTier.Boss, 0.7f);
-                selection.AddChoice(ItemTier.VoidBoss, 0.3f);
-
-                var tier = selection.Evaluate(debugRng.nextNormalizedFloat);
-                GiveRandomItems(PlayerCharacterMasterController.instances[0].master.inventory, dropLists[tier], 5, debugRng);
-            }
-            */
         }
 
         private void RestackBehavior(Inventory self, Xoroshiro128Plus rng)
