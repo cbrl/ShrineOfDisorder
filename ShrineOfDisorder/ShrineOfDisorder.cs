@@ -346,13 +346,13 @@ namespace ShrineOfDisorder
 
             // Generate a new list of inventories that's randomly shuffled. Each inventory will be
             // swapped with the one at the corresponding index in this suffled list.
-            var shuffledInventories = inventories.OrderBy(n => rng.Next()).ToList();
+            var shuffledInventories = inventories.OrderBy(n => rng.Next());
 
-            for (int i = 0; i < inventories.Count; ++i)
+            foreach (var (inventoryA, inventoryB) in inventories.Zip(shuffledInventories, (a, b) => (a, b)))
             {
-                tempInventory.CopyItemsFrom(inventories[i]);
-                inventories[i].CopyItemsFrom(shuffledInventories[i]);
-                shuffledInventories[i].CopyItemsFrom(tempInventory);
+                tempInventory.CopyItemsFrom(inventoryA);
+                inventoryA.CopyItemsFrom(inventoryB);
+                inventoryB.CopyItemsFrom(tempInventory);
             }
         }
     }
