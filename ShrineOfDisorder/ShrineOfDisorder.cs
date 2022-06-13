@@ -68,6 +68,11 @@ namespace ShrineOfDisorder
         // This ensures the shrine of order can be spawned in all scenes.
         private void SceneDirector_onGenerateInteractableCardSelection(SceneDirector director, DirectorCardCategorySelection selection)
         {
+            if (!NetworkServer.active)
+            {
+                return;
+            }
+
             // The DirectorCardCategorySelection.FindCategoryIndexByName() method is broken, and doesn't
             // actually compare the category names to the argument. This is the working version.
             static int FindCategoryIndexByName_WorkingVersion(DirectorCardCategorySelection dccs, string name)
