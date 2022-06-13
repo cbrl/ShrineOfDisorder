@@ -17,7 +17,7 @@ namespace ShrineOfDisorder
     public class ShrineOfDisorder : BaseUnityPlugin
     {
         public const string PluginGUID = PluginAuthor + "." + PluginName;
-        public const string PluginAuthor = "Vatora";
+        public const string PluginAuthor = "cbrl";
         public const string PluginName = "ShrineOfDisorder";
         public const string PluginVersion = "1.0.0";
 
@@ -82,21 +82,54 @@ namespace ShrineOfDisorder
                 return -1;
             }
 
+            static bool hasCard(DirectorCardCategorySelection dccs, int index, string name)
+            {
+                return dccs.categories[index].cards.Any(card => card.spawnCard.name.StartsWith(name));
+            }
+
+            static int getWeight(DirectorCardCategorySelection dccs, int index, string name)
+            {
+                foreach (var card in dccs.categories[index].cards)
+                {
+                    if (card.spawnCard.name.StartsWith(name))
+                    {
+                        return card.selectionWeight;
+                    }
+                }
+                return -1;
+            }
 
             int index = FindCategoryIndexByName_WorkingVersion(selection, "Shrines");
-            if (index >= 0)
+            if (index >= 0 && !hasCard(selection, index, "iscShrineRestack"))
             {
+                string[] searchWeights = { "iscShrineBoss", "iscShrineBlood", "iscShrineCombat" };
+
+                // The weight of the shrine will be equal to the weight of the first shrine found in the order
+                // defined above, or 3 if none were found.
+                int weight = searchWeights.Select(search => getWeight(selection, index, search)).FirstOrDefault(weight => weight != -1);
+                if (weight == 0)
+                {
+                    weight = 3;
+                }
+
                 var restackCard = new DirectorCard
                 {
                     spawnCard = Addressables.LoadAssetAsync<SpawnCard>("RoR2/Base/ShrineRestack/iscShrineRestack.asset").WaitForCompletion(),
-                    selectionWeight = (int)(60 * config.shrineSpawnMultiplier)
+                    selectionWeight = (int)(weight * config.shrineSpawnMultiplier)
                 };
 
                 selection.AddCard(index, restackCard);
+                Log.LogInfo($"Added card with weight: {restackCard.selectionWeight}");
             }
             else
             {
                 Log.LogError("Could not find 'Shrines' category. Shrine of Order will not be added to every stage.");
+            }
+
+            foreach (var cat in selection.categories)
+            {
+                var cardString = string.Join("\n    ", cat.cards.Select(card => $"{cat.name}.{card.spawnCard.name} weight: {card.selectionWeight}"));
+                Log.LogInfo($"{cat.name} weight: {cat.selectionWeight}\n    {cardString}");
             }
         }
 
@@ -120,11 +153,11 @@ namespace ShrineOfDisorder
 
             foreach (var item in dropLists)
             {
-                Log.LogDebug($"{item.Key} Drop Lists: {string.Join(",", item.Value)}");
+                Log.LogDebug($"{item.Key} Drop List: {string.Join(", ", item.Value)}");
             }
         }
 
-        //The Update() method is run on every frame of the game.
+        // The Update() method is run on every frame of the game.
         private void Update()
         {
         }
@@ -175,6 +208,11 @@ namespace ShrineOfDisorder
                 var item = rng.NextElementUniform(dropList);
                 //Log.LogDebug($"Giving {item} (index: {item.itemIndex}) to player");
                 inventory.GiveItem(item.itemIndex);
+
+                if (!given.ContainsKey(item))
+                {
+                    given[item] = 0;
+                }
                 given[item] += 1;
             }
 
