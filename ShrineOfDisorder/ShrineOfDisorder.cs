@@ -30,6 +30,14 @@ namespace ShrineOfDisorder
         // Dictionary of all drop lists by tier. Will be populated when the run starts.
         private static Dictionary<ItemTier, List<PickupIndex>> dropLists;
 
+        private readonly string[] bannedStageNames = { "bazaar", "artifactworld", "mysteryspace", "limbo" };
+
+        // The spawn weight of the shrine will be equal to the first shrine found matchind one of these types.
+        private readonly string[] searchWeights = { "iscShrineBoss", "iscShrineBlood", "iscShrineCombat" };
+
+        // If none of the target shrines were found when searching for a suitable shrine weight, then this value will be used.
+        private const int defaultShrineWeight = 3;
+
         public void Awake()
         {
             //Init our logging class so that we can properly log for debugging
@@ -68,11 +76,6 @@ namespace ShrineOfDisorder
         // This ensures the shrine of order can be spawned in all scenes.
         private void SceneDirector_onGenerateInteractableCardSelection(SceneDirector director, DirectorCardCategorySelection selection)
         {
-            if (!NetworkServer.active)
-            {
-                return;
-            }
-
             // The DirectorCardCategorySelection.FindCategoryIndexByName() method is broken, and doesn't
             // actually compare the category names to the argument. This is the working version.
             static int FindCategoryIndexByName_WorkingVersion(DirectorCardCategorySelection dccs, string name)
@@ -104,17 +107,29 @@ namespace ShrineOfDisorder
                 return -1;
             }
 
+            if (!NetworkServer.active)
+            {
+                return;
+            }
+
+            if (bannedStageNames.Contains(Stage.instance.name))
+            {
+                return;
+            }
+
+            // Insert the card into the "Shrines" category (if it isn't already in there)
             int index = FindCategoryIndexByName_WorkingVersion(selection, "Shrines");
             if (index >= 0 && !hasCard(selection, index, "iscShrineRestack"))
             {
-                string[] searchWeights = { "iscShrineBoss", "iscShrineBlood", "iscShrineCombat" };
-
                 // The weight of the shrine will be equal to the weight of the first shrine found in the order
-                // defined above, or 3 if none were found.
+                // defined by the searchWeights list, or the default value if none were found. This is done to
+                // get a suitable weight in the range of the other shrines, since they can have very different
+                // values depending on the stage. If a static value was used all the time, the shrine could
+                // almost never spawn or spawn too often.
                 int weight = searchWeights.Select(search => getWeight(selection, index, search)).FirstOrDefault(weight => weight != -1);
                 if (weight == 0)
                 {
-                    weight = 3;
+                    weight = defaultShrineWeight;
                 }
 
                 var restackCard = new DirectorCard
@@ -126,15 +141,16 @@ namespace ShrineOfDisorder
                 selection.AddCard(index, restackCard);
                 Log.LogInfo($"Added card with weight: {restackCard.selectionWeight}");
             }
-            else
+            else if (index < 0)
             {
-                Log.LogError("Could not find 'Shrines' category. Shrine of Order will not be added to every stage.");
+                Log.LogWarning($"Could not find 'Shrines' category in stage {Stage.instance.name}. The Shrine of Order will not be added to this stage.");
             }
 
+            // Log card categories and weights
             foreach (var cat in selection.categories)
             {
                 var cardString = string.Join("\n    ", cat.cards.Select(card => $"{cat.name}.{card.spawnCard.name} weight: {card.selectionWeight}"));
-                Log.LogInfo($"{cat.name} weight: {cat.selectionWeight}\n    {cardString}");
+                Log.LogDebug($"{cat.name} weight: {cat.selectionWeight}\n    {cardString}");
             }
         }
 
