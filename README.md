@@ -2,6 +2,9 @@
 
 Modifies the Shrine of Order behavior for more fun and less pain.
 
+By default, this mod will make the Shrine of Order randomize items per-stack instead of per-tier. This means you will still have the same number of unique stacks after using the shrine, instead of one stack per item tier, meaning the shrine is not necessarily a death sentence any longer.
+The Shrine of Order will now also have the ability to spawn on every map, giving more opportunities to use it.
+
 ## Changelog
 
 **1.1.0**
