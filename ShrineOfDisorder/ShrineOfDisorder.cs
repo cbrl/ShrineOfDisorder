@@ -141,8 +141,8 @@ namespace ShrineOfDisorder
             {
                 switch (config.shrineBehavior)
                 {
-                    case ShrineBehavior.RandomizeEachStack: RandomizeItemStacks(self, rng); break;
-                    default: RandomizeItems(self, rng); break;
+                    case ShrineBehavior.RandomizeEachItem: RandomizeItems(self, rng); break;
+                    default: RandomizeItemStacks(self, rng); break;
                 }
             }
             else
@@ -153,7 +153,7 @@ namespace ShrineOfDisorder
                     case ShrineBehavior.RandomizeEachStack: RandomizeItemStacks(self, rng); break;
                     case ShrineBehavior.SwapPlayerInventory: SwapOneInventory(self, rng); break;
                     case ShrineBehavior.SwapAllInventories: SwapAllInventories(rng); break;
-                    default: RandomizeItems(self, rng); break;
+                    default: RandomizeItemStacks(self, rng); break;
                 }
             }
         }
