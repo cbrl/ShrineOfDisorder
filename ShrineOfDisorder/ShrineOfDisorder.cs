@@ -11,6 +11,46 @@ using System.Linq;
 
 namespace ShrineOfDisorder
 {
+    public static class DccsExtensions
+    {
+        // The DirectorCardCategorySelection.FindCategoryIndexByName() method is broken, and doesn't
+        // actually compare the category names to the argument. This is the working version.
+        public static int FindCategoryIndexByName_WorkingVersion(this DirectorCardCategorySelection dccs, string categoryName)
+        {
+            for (int i = 0; i < dccs.categories.Length; ++i)
+            {
+                if (dccs.categories[i].name == categoryName)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public static DirectorCard GetCard(this DirectorCardCategorySelection dccs, int categoryIndex, string cardName)
+        {
+            foreach (var card in dccs.categories[categoryIndex].cards)
+            {
+                if (card.spawnCard.name.StartsWith(cardName))
+                {
+                    return card;
+                }
+            }
+            return null;
+        }
+
+        public static bool HasCard(this DirectorCardCategorySelection dccs, int categoryIndex, string cardName)
+        {
+            return dccs.GetCard(categoryIndex, cardName) != null;
+        }
+
+        public static int GetWeight(this DirectorCardCategorySelection dccs, int categoryIndex, string cardName)
+        {
+            return dccs.GetCard(categoryIndex, cardName)?.selectionWeight ?? -1;
+        }
+    }
+
+
     [BepInDependency(R2API.R2API.PluginGUID)]
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [NetworkCompatibility(CompatibilityLevel.NoNeedForSync, VersionStrictness.DifferentModVersionsAreOk)] //The mod is compatible with multiplayer, and only the host needs the mod.
@@ -76,37 +116,6 @@ namespace ShrineOfDisorder
         // This ensures the shrine of order can be spawned in all scenes.
         private void SceneDirector_onGenerateInteractableCardSelection(SceneDirector director, DirectorCardCategorySelection selection)
         {
-            // The DirectorCardCategorySelection.FindCategoryIndexByName() method is broken, and doesn't
-            // actually compare the category names to the argument. This is the working version.
-            static int FindCategoryIndexByName_WorkingVersion(DirectorCardCategorySelection dccs, string name)
-            {
-                for (int i = 0; i < dccs.categories.Length; ++i)
-                {
-                    if (dccs.categories[i].name == name)
-                    {
-                        return i;
-                    }
-                }
-                return -1;
-            }
-
-            static bool hasCard(DirectorCardCategorySelection dccs, int index, string name)
-            {
-                return dccs.categories[index].cards.Any(card => card.spawnCard.name.StartsWith(name));
-            }
-
-            static int getWeight(DirectorCardCategorySelection dccs, int index, string name)
-            {
-                foreach (var card in dccs.categories[index].cards)
-                {
-                    if (card.spawnCard.name.StartsWith(name))
-                    {
-                        return card.selectionWeight;
-                    }
-                }
-                return -1;
-            }
-
             if (!NetworkServer.active)
             {
                 return;
@@ -118,15 +127,15 @@ namespace ShrineOfDisorder
             }
 
             // Insert the card into the "Shrines" category (if it isn't already in there)
-            int index = FindCategoryIndexByName_WorkingVersion(selection, "Shrines");
-            if (index >= 0 && !hasCard(selection, index, "iscShrineRestack"))
+            int index = selection.FindCategoryIndexByName_WorkingVersion("Shrines");
+            if (index >= 0 && !selection.HasCard(index, "iscShrineRestack"))
             {
                 // The weight of the shrine will be equal to the weight of the first shrine found in the order
                 // defined by the searchWeights list, or the default value if none were found. This is done to
                 // get a suitable weight in the range of the other shrines, since they can have very different
                 // values depending on the stage. If a static value was used all the time, the shrine could
                 // almost never spawn or spawn too often.
-                int weight = searchWeights.Select(search => getWeight(selection, index, search)).FirstOrDefault(weight => weight != -1);
+                int weight = searchWeights.Select(search => selection.GetWeight(index, search)).FirstOrDefault(weight => weight != -1);
                 if (weight == 0)
                 {
                     weight = defaultShrineWeight;
@@ -190,8 +199,8 @@ namespace ShrineOfDisorder
                 return;
             }
             
-            // Always use the default shrine behavior if the player count is <= 2
-            if (NetworkUser.readOnlyInstancesList.Count <= 2)
+            // Always use the default shrine behavior if the player count is < 2
+            if (NetworkUser.readOnlyInstancesList.Count < 2)
             {
                 switch (config.shrineBehavior)
                 {
@@ -205,16 +214,16 @@ namespace ShrineOfDisorder
                 {
                     case ShrineBehavior.RandomizeEachItem: RandomizeItems(self, rng); break;
                     case ShrineBehavior.RandomizeEachStack: RandomizeItemStacks(self, rng); break;
-                    case ShrineBehavior.SwapPlayerInventory: SwapOneInventory(self, rng); break;
+                    case ShrineBehavior.SwapOneInventory: SwapOneInventory(self, rng); break;
                     case ShrineBehavior.SwapAllInventories: SwapAllInventories(rng); break;
                     default: RandomizeItemStacks(self, rng); break;
                 }
             }
         }
 
-        private static void ResetItems(Inventory inventory, ItemTier tier)
+        private static void ResetItems(Inventory inventory, List<PickupIndex> items)
         {
-            foreach (PickupIndex index in dropLists[tier])
+            foreach (PickupIndex index in items)
             {
                 inventory.ResetItem(index.itemIndex);
             }
@@ -281,7 +290,7 @@ namespace ShrineOfDisorder
             // For each enabled tier, remove all the items of that tier.
             foreach (var tier in enabledTiers)
             {
-                ResetItems(self, tier);
+                ResetItems(self, dropLists[tier]);
             }
 
             self.itemAcquisitionOrder.Clear();
@@ -306,7 +315,7 @@ namespace ShrineOfDisorder
             // For each enabled tier, remove all the items of that tier.
             foreach (var tier in enabledTiers)
             {
-                ResetItems(self, tier);
+                ResetItems(self, dropLists[tier]);
             }
 
             self.itemAcquisitionOrder.Clear();

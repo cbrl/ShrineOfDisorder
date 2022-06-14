@@ -8,7 +8,7 @@ The Shrine of Order will now also have the ability to spawn on every map, giving
 
 Configuration options are available for options such as the shrine behavior, shrine spawn chance, whether the shrine can spawn on all maps, and whether to randomize special items (e.g. lunar, void, boss).
 
-**Warning:** The inventory swapping behavior is currently untested.
+**Warning:** The optional shrine behavior which swaps player inventories is currently untested.
 
 ## Changelog
 

@@ -7,7 +7,7 @@ namespace ShrineOfDisorder
     {
         RandomizeEachStack,
         RandomizeEachItem,
-        SwapPlayerInventory,
+        SwapOneInventory,
         SwapAllInventories
     }
 
@@ -30,7 +30,7 @@ namespace ShrineOfDisorder
             voidItemsCfg             = cfg.Bind("Items", "VoidItems", false, "Swap void items when activating the shrine");
             bossItemsCfg             = cfg.Bind("Items", "BossItems", false, "Swap boss items when activating the shrine");
             voidBossItemsCfg         = cfg.Bind("Items", "VoidBossItems", false, "Swap void boss items when activating the shrine");
-            shrineBehaviorCfg        = cfg.Bind("Behavior", "ShrineBehavior", ShrineBehavior.RandomizeEachStack, "The behavior of the shrine. The inventory swapping behavior is only enabled for games with 3 or more players. Otherwise, the default behavior will be used.");
+            shrineBehaviorCfg        = cfg.Bind("Behavior", "ShrineBehavior", ShrineBehavior.RandomizeEachStack, "The behavior of the shrine. The inventory swapping behavior is only enabled for games with 2 or more players. Otherwise, the default behavior will be used.");
             preserveStackCountCfg    = cfg.Bind("Behavior", "PresrveStackCount", true, "If using the RandomizeEachStack behavior, preserve the number of unique stacks. If disabled, the same item could be randomly given selected for multiple stacks, effectively merging them.");
             onlyObtainedItemsCfg     = cfg.Bind("Behavior", "OnlyObtainedItems", false, "When determining which items to give the player, only consider items that they already have in their inventory.");
             shrineOnAllMapsCfg       = cfg.Bind("Behavior", "ShrineOnAllMaps", true, "Allow the shrine to spawn on all maps.");
