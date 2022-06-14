@@ -65,7 +65,7 @@ namespace ShrineOfDisorder
         public ShrineConfig config;
 
         // Item tiers enabled in the config
-        private List<ItemTier> enabledTiers = new List<ItemTier>();
+        private HashSet<ItemTier> enabledTiers = new HashSet<ItemTier>();
 
         // Dictionary of all drop lists by tier. Will be populated when the run starts.
         private static Dictionary<ItemTier, List<PickupIndex>> dropLists;
