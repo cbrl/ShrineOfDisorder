@@ -6,11 +6,14 @@ By default, this mod will make the Shrine of Order randomize items per-stack ins
 
 The Shrine of Order will now also have the ability to spawn on every map, giving more opportunities to use it.
 
-Configuration options are available for options such as the shrine behavior, shrine spawn chance, whether the shrine can spawn on all maps, and whether to randomize special items (e.g. lunar, void, boss).
+Configuration options are available for most features, such as the shrine behavior, shrine spawn chance, whether the shrine can spawn on all maps, and whether to randomize special items (e.g. lunar, void, boss).
 
 **Warning:** The optional shrine behavior which swaps player inventories is currently untested.
 
 ## Changelog
+
+**1.1.2**
+- Changed a configuration enum name to be a bit more accurate to its function.
 
 **1.1.1**
 - Added a list of stages the shrine will never spawn on, regardless of wether they have a shrines category or not.
