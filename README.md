@@ -57,6 +57,12 @@ Each of the options under the "Items" category will allow or disallow certain it
 
 ## Changelog
 
+**1.1.3**
+- Documented the configuration options in the readme
+- Updated some configuration descriptions
+- Fixed some spelling errors
+- Added a license
+
 **1.1.2**
 - Changed a configuration enum name to be a bit more accurate to its function.
 
