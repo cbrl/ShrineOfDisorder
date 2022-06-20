@@ -8,7 +8,52 @@ The Shrine of Order will now also have the ability to spawn on every map, giving
 
 Configuration options are available for most features, such as the shrine behavior, shrine spawn chance, whether the shrine can spawn on all maps, and whether to randomize special items (e.g. lunar, void, boss).
 
-**Warning:** The optional shrine behavior which swaps player inventories is currently untested.
+## Configuration
+
+### Behavior
+
+The following options modify the behavior of shrine effect, as well as where and how often it can spawn.
+
+#### `ShrineBehavior`
+
+- `RandomizeEachStack` - For each stack of items in the player's inventory, replace it with an equal size stack of a randomly chosen item in the same tier.
+- `RandomizeEachItem` - For each item in the player's inventory, replace it with a randomly chosen item of the same tier.
+- `SwapOneInventory` -  Swap the inventory of the player which activated the shrine with one other randomly selected player.
+- `SwapAllInventories` - Randomly swap the inventories of every player.
+
+**Warning:** The shrine behaviors which swaps player inventories are currently untested.
+
+Defaults to `RandomizeEachStack`.
+
+#### `OnlyObtainedItems`
+
+When determining which items to give the player, only consider they items that they already have in their inventory.
+
+Disabled by default.
+
+#### `PreserveStackCount`
+
+If using the `RandomizeEachStack` behavior, enabling this option will preserve the number of unique stacks a player has in their inventory. If disabled, the same item could be randomly selected for different stacks, effectively merging them.
+
+Enabled by default.
+
+#### `ShrineOnAllMaps`
+
+Allows the shrine to spawn on all maps.
+
+Enabled by default.
+
+#### `ShrineSpawnMultiplier`
+
+A multiplier on the shrine's spawn weight. Higher values will increase the chance for the shrine to spawn, and decrease the chance for other shrines to spawn.
+
+### Items
+
+Each of the options under the "Items" category will allow or disallow certain item tiers to be considered when randomizing items. The available options are as follows:
+- `LunarItems` - Allows lunar items to be randomized if enabled.
+- `VoidItems` - Allows void items to be randomized if enabled.
+- `BossItems` - Allows boss items to be randomized if enabled.
+- `VoidBossItems` - Allows void boss items to be randomized if enabled.
 
 ## Changelog
 
