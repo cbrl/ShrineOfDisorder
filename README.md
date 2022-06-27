@@ -21,13 +21,13 @@ The following options modify the behavior of shrine effect, as well as where and
 - `SwapOneInventory` -  Swap the inventory of the player which activated the shrine with one other randomly selected player.
 - `SwapAllInventories` - Randomly swap the inventories of every player.
 
-**Warning:** The shrine behaviors which swaps player inventories are currently untested.
+**Warning:** The shrine behaviors which swap player inventories are currently untested.
 
 Defaults to `RandomizeEachStack`.
 
 #### `OnlyObtainedItems`
 
-When determining which items to give the player, only consider they items that they already have in their inventory.
+When determining which items to give the player, only consider the items that they have in their inventory as potential candidates.
 
 Disabled by default.
 
