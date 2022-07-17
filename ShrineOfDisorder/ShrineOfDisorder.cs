@@ -226,6 +226,7 @@ namespace ShrineOfDisorder
             foreach (PickupIndex index in items)
             {
                 inventory.ResetItem(index.itemIndex);
+                inventory.itemAcquisitionOrder.Remove(index.itemIndex);
             }
         }
 
@@ -293,7 +294,6 @@ namespace ShrineOfDisorder
                 ResetItems(self, dropLists[tier]);
             }
 
-            self.itemAcquisitionOrder.Clear();
             self.SetDirtyBit(8u);
 
             //Log.LogDebug($"Player item counts: \n{string.Join("\n", itemCounts)}");
@@ -318,7 +318,6 @@ namespace ShrineOfDisorder
                 ResetItems(self, dropLists[tier]);
             }
 
-            self.itemAcquisitionOrder.Clear();
             self.SetDirtyBit(8u);
 
             //Log.LogDebug($"Player item counts: \n{string.Join("\n", itemCounts.Select(counts => string.Join("\n  ", counts)))}");
