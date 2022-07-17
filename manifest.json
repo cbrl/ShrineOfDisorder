@@ -1,6 +1,6 @@
 ﻿{
 	"name": "ShrineOfDisorder",
-	"version_number": "1.1.3",
+	"version_number": "1.1.4",
 	"website_url": "https://github.com/cbrl/ShrineOfDisorder",
 	"description": "Modifies the Shrine of Order behavior for more fun and less pain.",
 	"dependencies": [

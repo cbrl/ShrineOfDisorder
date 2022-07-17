@@ -57,6 +57,9 @@ Each of the options under the "Items" category will allow or disallow certain it
 
 ## Changelog
 
+**1.1.4**
+- Fixed a bug causing items to disappear from the inventory when using the shrine if they belong to a tier that is disabled in the configuration
+
 **1.1.3**
 - Documented the configuration options in the readme
 - Updated some configuration descriptions
