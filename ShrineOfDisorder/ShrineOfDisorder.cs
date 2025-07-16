@@ -68,7 +68,7 @@ namespace ShrineOfDisorder
         private HashSet<ItemTier> enabledTiers = new HashSet<ItemTier>();
 
         // Dictionary of all drop lists by tier. Will be populated when the run starts.
-        private static Dictionary<ItemTier, List<PickupIndex>> dropLists;
+        private static Dictionary<ItemTier, List<ItemDef>> dropLists;
 
         private readonly string[] bannedStageNames = { "bazaar", "artifactworld", "mysteryspace", "limbo" };
 
@@ -168,17 +168,17 @@ namespace ShrineOfDisorder
         {
             orig(self);
 
-            dropLists = new Dictionary<ItemTier, List<PickupIndex>>
+            dropLists = new Dictionary<ItemTier, List<ItemDef>>
             {
-                {ItemTier.Tier1,     Run.instance.availableTier1DropList},
-                {ItemTier.Tier2,     Run.instance.availableTier2DropList},
-                {ItemTier.Tier3,     Run.instance.availableTier3DropList},
-                {ItemTier.Lunar,     Run.instance.availableLunarItemDropList},
-                {ItemTier.Boss,      Run.instance.availableBossDropList},
-                {ItemTier.VoidTier1, Run.instance.availableVoidTier1DropList},
-                {ItemTier.VoidTier2, Run.instance.availableVoidTier2DropList},
-                {ItemTier.VoidTier3, Run.instance.availableVoidTier3DropList},
-                {ItemTier.VoidBoss,  Run.instance.availableVoidBossDropList}
+                {ItemTier.Tier1,     Run.instance.availableTier1DropList.ConvertAll(GetItemDef)},
+                {ItemTier.Tier2,     Run.instance.availableTier2DropList.ConvertAll(GetItemDef)},
+                {ItemTier.Tier3,     Run.instance.availableTier3DropList.ConvertAll(GetItemDef)},
+                {ItemTier.Lunar,     Run.instance.availableLunarItemDropList.ConvertAll(GetItemDef)},
+                {ItemTier.Boss,      Run.instance.availableBossDropList.ConvertAll(GetItemDef)},
+                {ItemTier.VoidTier1, Run.instance.availableVoidTier1DropList.ConvertAll(GetItemDef)},
+                {ItemTier.VoidTier2, Run.instance.availableVoidTier2DropList.ConvertAll(GetItemDef)},
+                {ItemTier.VoidTier3, Run.instance.availableVoidTier3DropList.ConvertAll(GetItemDef)},
+                {ItemTier.VoidBoss,  Run.instance.availableVoidBossDropList.ConvertAll(GetItemDef)}
             };
 
             foreach (var item in dropLists)
@@ -221,24 +221,24 @@ namespace ShrineOfDisorder
             }
         }
 
-        private static void ResetItems(Inventory inventory, List<PickupIndex> items)
+        private static void ResetItems(Inventory inventory, List<ItemDef> items)
         {
-            foreach (PickupIndex index in items)
+            foreach (ItemDef item in items)
             {
-                inventory.ResetItem(index.itemIndex);
-                inventory.itemAcquisitionOrder.Remove(index.itemIndex);
+                inventory.ResetItem(item);
+                inventory.itemAcquisitionOrder.Remove(item.itemIndex);
             }
         }
 
-        private static Dictionary<PickupIndex, int> GiveRandomItems(Inventory inventory, List<PickupIndex> dropList, int count, Xoroshiro128Plus rng)
+        private static Dictionary<ItemDef, int> GiveRandomItems(Inventory inventory, List<ItemDef> dropList, int count, Xoroshiro128Plus rng)
         {
-            var given = new Dictionary<PickupIndex, int>();
+            var given = new Dictionary<ItemDef, int>();
 
             for (int i = 0; i < count; ++i)
             {
                 var item = rng.NextElementUniform(dropList);
                 //Log.LogDebug($"Giving {item} (index: {item.itemIndex}) to player");
-                inventory.GiveItem(item.itemIndex);
+                inventory.GiveItem(item);
 
                 if (!given.ContainsKey(item))
                 {
@@ -250,17 +250,17 @@ namespace ShrineOfDisorder
             return given;
         }
 
-        private static PickupIndex GiveRandomStack(Inventory inventory, List<PickupIndex> dropList, int count, Xoroshiro128Plus rng)
+        private static ItemDef GiveRandomStack(Inventory inventory, List<ItemDef> dropList, int count, Xoroshiro128Plus rng)
         {
             var item = rng.NextElementUniform(dropList);
             //Log.LogDebug($"Giving {count}x{item} (index: {item.itemIndex}) to player");
-            inventory.GiveItem(item.itemIndex, count);
+            inventory.GiveItem(item, count);
             return item;
         }
 
-        private Dictionary<ItemTier, Dictionary<PickupIndex, int>> GetItemCounts(Inventory inventory)
+        private Dictionary<ItemTier, Dictionary<ItemDef, int>> GetItemCounts(Inventory inventory)
         {
-            var itemCounts = new Dictionary<ItemTier, Dictionary<PickupIndex, int>>();
+            var itemCounts = new Dictionary<ItemTier, Dictionary<ItemDef, int>>();
 
             // Record how many items the player had (organized by tier, then by item index).
             foreach (var tier in dropLists.Keys)
@@ -273,7 +273,7 @@ namespace ShrineOfDisorder
                     {
                         if (!itemCounts.ContainsKey(tier))
                         {
-                            itemCounts.Add(tier, new Dictionary<PickupIndex, int>());
+                            itemCounts.Add(tier, new Dictionary<ItemDef, int>());
                         }
 
                         itemCounts[tier][item] = count;
@@ -328,13 +328,13 @@ namespace ShrineOfDisorder
                 var tier   = tierDictPair.Key;
                 var counts = tierDictPair.Value;
 
-                List<PickupIndex> dropList = null;
+                List<ItemDef> dropList = null;
 
                 // If the preserveStackCount option is enabled, then the drop list will need to be a
                 // copy of the original, as the values will be removed from the list once they're used.
                 if (config.preserveStackCount)
                 {
-                    dropList = new List<PickupIndex>(config.onlyObtainedItems ? counts.Keys.ToList() : dropLists[tier]);
+                    dropList = new List<ItemDef>(config.onlyObtainedItems ? counts.Keys.ToList() : dropLists[tier]);
                 }
                 else
                 {
@@ -374,7 +374,7 @@ namespace ShrineOfDisorder
             var tempInventory = new Inventory();
 
             // Generate a new list of inventories that's randomly shuffled. Each inventory will be
-            // swapped with the one at the corresponding index in this suffled list.
+            // swapped with the one at the corresponding index in this shuffled list.
             var shuffledInventories = inventories.OrderBy(n => rng.Next());
 
             foreach (var (inventoryA, inventoryB) in inventories.Zip(shuffledInventories, (a, b) => (a, b)))
@@ -383,6 +383,11 @@ namespace ShrineOfDisorder
                 inventoryA.CopyItemsFrom(inventoryB);
                 inventoryB.CopyItemsFrom(tempInventory);
             }
+        }
+        private static ItemDef GetItemDef(PickupIndex index)
+        {
+            // For some reason this is the only non-deprecated way to get an ItemDef from a PickupIndex
+            return ItemCatalog.GetItemDef(PickupCatalog.GetPickupDef(index).itemIndex);
         }
     }
 }

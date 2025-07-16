@@ -42,7 +42,7 @@ namespace ShrineOfDisorder
                 "Behavior",
                 "PreserveStackCount",
                 true,
-                "Oreserve the number of unique stacks when using the RandomizeEachStack behavior. If disabled, the same item can be randomly selected for multiple stacks, effectively merging them."
+                "Preserve the number of unique stacks when using the RandomizeEachStack behavior. If disabled, the same item can be randomly selected for multiple stacks, effectively merging them."
             );
 
             onlyObtainedItemsCfg = cfg.Bind(
