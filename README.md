@@ -68,6 +68,9 @@ considered when randomizing items. The available options are as follows:
 
 ## Changelog
 
+**1.1.6**
+- Updated dependencies
+
 **1.1.5**
 - Update dependencies to latest versions
 - Removed the use of deprecated ItemIndex methods
