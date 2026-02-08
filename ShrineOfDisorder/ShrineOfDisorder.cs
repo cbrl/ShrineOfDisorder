@@ -117,50 +117,62 @@ namespace ShrineOfDisorder
         // This ensures the shrine of order can be spawned in all scenes.
         private void SceneDirector_onGenerateInteractableCardSelection(SceneDirector director, DirectorCardCategorySelection selection)
         {
-            if (!NetworkServer.active)
+            try
             {
-                return;
-            }
-
-            if (bannedStageNames.Contains(Stage.instance.name))
-            {
-                return;
-            }
-
-            // Insert the card into the "Shrines" category (if it isn't already in there)
-            int index = selection.FindCategoryIndexByName_WorkingVersion("Shrines");
-            if (index >= 0 && !selection.HasCard(index, "iscShrineRestack"))
-            {
-                // The weight of the shrine will be equal to the weight of the first shrine found in the order
-                // defined by the searchWeights list, or the default value if none were found. This is done to
-                // get a suitable weight in the range of the other shrines, since they can have very different
-                // values depending on the stage. If a static value was used all the time, the shrine could
-                // almost never spawn or spawn too often.
-                int weight = searchWeights.Select(search => selection.GetWeight(index, search)).FirstOrDefault(weight => weight != -1);
-                if (weight == 0)
+                if (!NetworkServer.active)
                 {
-                    weight = defaultShrineWeight;
+                    return;
                 }
 
-                var restackCard = new DirectorCard
+                if (bannedStageNames.Contains(Stage.instance.name))
                 {
-                    spawnCard = Addressables.LoadAssetAsync<SpawnCard>("RoR2/Base/ShrineRestack/iscShrineRestack.asset").WaitForCompletion(),
-                    selectionWeight = (int)(weight * config.shrineSpawnMultiplier)
-                };
+                    return;
+                }
 
-                selection.AddCard(index, restackCard);
-                Log.LogInfo($"Added card with weight: {restackCard.selectionWeight}");
-            }
-            else if (index < 0)
-            {
-                Log.LogWarning($"Could not find 'Shrines' category in stage {Stage.instance.name}. The Shrine of Order will not be added to this stage.");
-            }
+                // Insert the card into the "Shrines" category (if it isn't already in there)
+                int index = selection.FindCategoryIndexByName_WorkingVersion("Shrines");
+                if (index >= 0 && !selection.HasCard(index, "iscShrineRestack"))
+                {
+                    // The weight of the shrine will be equal to the weight of the first shrine found in the order
+                    // defined by the searchWeights list, or the default value if none were found. This is done to
+                    // get a suitable weight in the range of the other shrines, since they can have very different
+                    // values depending on the stage. If a static value was used all the time, the shrine could
+                    // almost never spawn or spawn too often.
+                    int weight = searchWeights.Select(search => selection.GetWeight(index, search)).FirstOrDefault(weight => weight != -1);
+                    if (weight == 0)
+                    {
+                        weight = defaultShrineWeight;
+                    }
 
-            // Log card categories and weights
-            foreach (var cat in selection.categories)
+                    var restackCard = new DirectorCard
+                    {
+                        spawnCard = Addressables.LoadAssetAsync<SpawnCard>("RoR2/Base/ShrineRestack/iscShrineRestack.asset").WaitForCompletion(),
+                        selectionWeight = (int)(weight * config.shrineSpawnMultiplier)
+                    };
+
+                    selection.AddCard(index, restackCard);
+                    Log.LogInfo($"Added Shrine of Order card (iscShrineRestack) with weight: {restackCard.selectionWeight}");
+                }
+                else if (index < 0)
+                {
+                    Log.LogWarning($"Could not find 'Shrines' category in stage {Stage.instance.name}. The Shrine of Order will not be added to this stage.");
+                }
+
+                // Log card categories and weights
+                foreach (var cat in selection.categories)
+                {
+                    Log.LogDebug($"Category: '{cat.name}'. Weight: {cat.selectionWeight}");
+
+                    foreach (var card in cat.cards.Where(card => card != null && card.spawnCard != null))
+                    {
+                        Log.LogDebug($"  Card: {card.spawnCard.name} weight: {card.selectionWeight}");
+                    }
+                }
+            }
+            catch (Exception ex)
             {
-                var cardString = string.Join("\n    ", cat.cards.Select(card => $"{cat.name}.{card.spawnCard.name} weight: {card.selectionWeight}"));
-                Log.LogDebug($"{cat.name} weight: {cat.selectionWeight}\n    {cardString}");
+                Log.LogError($"Error in {nameof(SceneDirector_onGenerateInteractableCardSelection)}: {ex.Message}");
+                Log.LogError($"Stack trace:\n{ex.StackTrace}");
             }
         }
 
