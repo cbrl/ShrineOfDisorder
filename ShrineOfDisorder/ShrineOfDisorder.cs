@@ -8,6 +8,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace ShrineOfDisorder
 {
@@ -190,6 +191,33 @@ namespace ShrineOfDisorder
         // The Update() method is run on every frame of the game.
         private void Update()
         {
+#if false
+            List<ItemDef> list = null;
+            if (Input.GetKeyDown(KeyCode.LeftBracket))
+            {
+                list = dropLists[ItemTier.Tier1];
+            }
+            else if (Input.GetKeyDown(KeyCode.RightBracket))
+            {
+                list = dropLists[ItemTier.Tier2];
+            }
+            else if (Input.GetKeyDown(KeyCode.Backslash))
+            {
+                list = dropLists[ItemTier.Tier3];
+            }
+
+
+            if (list != null)
+            {
+                var rand = new System.Random();
+                GiveRandomItems(
+                    PlayerCharacterMasterController.instances[0].master.inventory,
+                    list,
+                    1,
+                    new Xoroshiro128Plus((uint)rand.Next())
+                );
+            }
+#endif
         }
 
         private void RestackBehavior(Inventory self, Xoroshiro128Plus rng)
@@ -225,7 +253,7 @@ namespace ShrineOfDisorder
         {
             foreach (ItemDef item in items)
             {
-                inventory.ResetItem(item);
+                inventory.ResetItemPermanent(item);
                 inventory.itemAcquisitionOrder.Remove(item.itemIndex);
             }
         }
@@ -238,7 +266,7 @@ namespace ShrineOfDisorder
             {
                 var item = rng.NextElementUniform(dropList);
                 //Log.LogDebug($"Giving {item} (index: {item.itemIndex}) to player");
-                inventory.GiveItem(item);
+                inventory.GiveItemPermanent(item);
 
                 if (!given.ContainsKey(item))
                 {
@@ -254,7 +282,7 @@ namespace ShrineOfDisorder
         {
             var item = rng.NextElementUniform(dropList);
             //Log.LogDebug($"Giving {count}x{item} (index: {item.itemIndex}) to player");
-            inventory.GiveItem(item, count);
+            inventory.GiveItemPermanent(item, count);
             return item;
         }
 
@@ -267,7 +295,7 @@ namespace ShrineOfDisorder
             {
                 foreach (var item in dropLists[tier])
                 {
-                    int count = inventory.GetItemCount(item.itemIndex);
+                    int count = inventory.GetItemCountPermanent(item.itemIndex);
 
                     if (count > 0)
                     {
