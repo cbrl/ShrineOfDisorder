@@ -68,6 +68,9 @@ considered when randomizing items. The available options are as follows:
 
 ## Changelog
 
+**1.1.7**
+- Fix potential null reference exception when adding shrine to map, and add exception handling.
+
 **1.1.6**
 - Updated dependencies
 
